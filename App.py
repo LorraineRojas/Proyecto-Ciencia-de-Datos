@@ -4,7 +4,7 @@ import plotly.express as px
 
 # Título y logo
 st.set_page_config(page_title="Dashboard SIKA", layout="wide")
-st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/4/49/Sika_logo.svg", use_column_width=True)
+st.sidebar.image("17327567437054941398141105234475.jpg", use_column_width=True)
 
 st.title("Proyección por Región y SKU")
 
