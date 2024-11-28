@@ -61,7 +61,9 @@ with col2:
 mes_actual = datetime.now().month
 
 def calcular_mes(index):
-    mes = (mes_actual + index + 1)
+    mes = (mes_actual + index  +  1) % 12 
+    mes = mes if mes != 0 else 12 
+    print(calendar.month_abbr[mes] )
     return calendar.month_abbr[mes] 
 
 if st.button("CONSULTAR"):
