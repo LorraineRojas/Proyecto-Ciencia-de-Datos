@@ -24,6 +24,7 @@ st.markdown(
     }
     div.stButton > button:hover, div.stDownloadButton > button:hover {
         background-color: #b71c1c;
+        color: #FFC510;
     }
     img {
         max-width: 200px;
@@ -45,22 +46,25 @@ def load_data():
 
 data = load_data()
 
-# Selector de Región
-regiones = data['regional_txt'].unique()
-region_seleccionada = st.selectbox("Selecciona una región", regiones)
+# Creación de columnas para los selectores
+col1, col2 = st.columns(2)
 
-# Selector de SKU con opción "Total"
-skus = ["Total"] + list(data['sku_cd'].unique())
-sku_seleccionado = st.selectbox("Selecciona un SKU", skus)
+with col1:
+    regiones = data['regional_txt'].unique()
+    region_seleccionada = st.selectbox("Selecciona una región", regiones)
+
+with col2:
+    skus = ["Total"] + list(data['sku_cd'].unique())
+    sku_seleccionado = st.selectbox("Selecciona un SKU", skus)
 
 # Definir mes actual y calcular mes correspondiente
 mes_actual = datetime.now().month
 
 def calcular_mes(index):
-    mes = (mes_actual + index - 1) % 12 + 1
+    mes = (mes_actual + index + 1)
     return calendar.month_abbr[mes] 
 
-if st.button("Consultar"):
+if st.button("CONSULTAR"):
     datos_filtrados = data[data['regional_txt'] == region_seleccionada].copy()
     datos_filtrados['mes'] = datos_filtrados.index.map(calcular_mes)
 
