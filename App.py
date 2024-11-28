@@ -11,7 +11,7 @@ st.markdown(
     """
     <style>
     h1 {
-        color: #d32f2f;
+        color: #D8282F;
     }
     div.stButton > button, div.stDownloadButton > button {
         background-color: #D8282F;
@@ -48,34 +48,48 @@ data = load_data()
 regiones = data['regional_txt'].unique()
 region_seleccionada = st.selectbox("Selecciona una región", regiones)
 
+# Selector de SKU con opción "Total"
+skus = ["Total"] + list(data['sku_cd'].unique())
+sku_seleccionado = st.selectbox("Selecciona un SKU", skus)
+
 # Definir mes actual y calcular mes correspondiente
-mes_actual = datetime.now().replace(day=1)  # Primer día del mes actual
-data['mes'] = data.index.map(lambda x: (mes_actual + timedelta(days=x*30)).strftime('%b'))
+mes_actual = datetime.now().month
+
+def calcular_mes(index):
+    mes = (mes_actual + index - 1) % 12 + 1
+    return calendar.month_abbr[mes] 
 
 if st.button("Consultar"):
-    datos_filtrados = data[data['regional_txt'] == region_seleccionada]
+    datos_filtrados = data[data['regional_txt'] == region_seleccionada].copy()
+    datos_filtrados['mes'] = datos_filtrados.index.map(calcular_mes)
 
-    # Agrupar por mes y SKU, obteniendo el top 5
-    top_skus_mensuales = datos_filtrados.groupby(['mes', 'sku_cd'])['forecast_val'].sum().reset_index()
-    top_skus_mensuales = top_skus_mensuales.sort_values(['mes', 'forecast_val'], ascending=[True, False]).groupby('mes').head(5)
+    if sku_seleccionado == "Total":
+        # Agrupar por mes y sumar valores para todos los SKUs
+        datos_agrupados = datos_filtrados.groupby('mes')['forecast_val'].sum().reset_index()
+        titulo_grafico = f"Proyección Total de Ventas por Mes - Región: {region_seleccionada}"
+    else:
+        # Filtrar por SKU seleccionado
+        datos_agrupados = datos_filtrados[datos_filtrados['sku_cd'] == sku_seleccionado].groupby('mes')['forecast_val'].sum().reset_index()
+        titulo_grafico = f"Proyección de Ventas del SKU {sku_seleccionado} por Mes - Región: {region_seleccionada}"
 
-    fig = px.bar(
-        top_skus_mensuales,
+    # Crear gráfico de serie de tiempo
+    fig = px.line(
+        datos_agrupados,
         x='mes',
         y='forecast_val',
-        color='sku_cd',
-        title=f"Top 5 de productos vendidos por mes - Región: {region_seleccionada}",
-        labels={'mes': 'Mes', 'forecast_val': 'Proyección', 'sku_cd': 'SKU'},
-        barmode='group'
+        title=titulo_grafico,
+        labels={'mes': 'Mes', 'forecast_val': 'Proyección'},
+        markers=True
     )
     st.plotly_chart(fig, use_container_width=True)
 
+    # Botón para descargar el informe
     csv = datos_filtrados.to_csv(index=False).encode('utf-8')
     st.download_button(
         label="DESCARGAR",
         data=csv,
-        file_name=f'informe_{region_seleccionada}.csv',
+        file_name=f'informe_{region_seleccionada}_{sku_seleccionado}.csv',
         mime='text/csv',
     )
 else:
-    st.write("Presiona 'Consultar' para generar el informe.")
+    st.write("Selecciona una región y un SKU, luego presiona 'Consultar' para generar el informe.")
