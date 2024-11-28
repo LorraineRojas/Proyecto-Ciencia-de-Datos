@@ -67,17 +67,18 @@ def calcular_mes(index):
     return f"{calendar.month_abbr[mes]} {año}"
 
 
-if st.button("CONSULTAR"):
+if st.button("Consultar"):
     datos_filtrados = data[data['regional_txt'] == region_seleccionada].copy()
-    datos_filtrados['mes'] = datos_filtrados.index.map(calcular_mes)
 
     if sku_seleccionado == "Total":
-        # Agrupar por mes y sumar valores para todos los SKUs
-        datos_agrupados = datos_filtrados.groupby('mes')['forecast_val'].sum().reset_index()
+        # Agrupar por index y sumar forecast_val antes de asignar meses
+        datos_agrupados = datos_filtrados.groupby('index')['forecast_val'].sum().reset_index()
+        datos_agrupados['mes'] = datos_agrupados['index'].map(calcular_mes)
         titulo_grafico = f"Proyección Total de Ventas por Mes - Región: {region_seleccionada}"
     else:
-        # Filtrar por SKU seleccionado
-        datos_agrupados = datos_filtrados[datos_filtrados['sku_cd'] == sku_seleccionado].groupby('mes')['forecast_val'].sum().reset_index()
+        # Filtrar por SKU seleccionado y luego agrupar por index
+        datos_agrupados = datos_filtrados[datos_filtrados['sku_cd'] == sku_seleccionado].groupby('index')['forecast_val'].sum().reset_index()
+        datos_agrupados['mes'] = datos_agrupados['index'].map(calcular_mes)
         titulo_grafico = f"Proyección de Ventas del SKU {sku_seleccionado} por Mes - Región: {region_seleccionada}"
 
     # Crear gráfico de serie de tiempo
