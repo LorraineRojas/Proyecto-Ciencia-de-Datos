@@ -67,7 +67,7 @@ def calcular_mes(index):
     return f"{calendar.month_abbr[mes]} {año}"
 
 
-if st.button("Consultar"):
+if st.button("CONSULTAR"):
     datos_filtrados = data[data['regional_txt'] == region_seleccionada].copy()
 
     if sku_seleccionado == "Total":
