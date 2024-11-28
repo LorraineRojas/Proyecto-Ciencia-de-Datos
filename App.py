@@ -57,14 +57,15 @@ with col2:
     skus = ["Total"] + list(data['sku_cd'].unique())
     sku_seleccionado = st.selectbox("Selecciona un SKU", skus)
 
-# Definir mes actual y calcular mes correspondiente
-mes_actual = datetime.now().month
+mes_inicial = 12  # Diciembre
+año_inicial = 2024
 
 def calcular_mes(index):
-    mes = (mes_actual + index  +  1) % 12 
-    mes = mes if mes != 0 else 12 
-    print(calendar.month_abbr[mes] )
-    return calendar.month_abbr[mes] 
+    total_meses = mes_inicial + index - 1
+    año = año_inicial + (total_meses // 12)
+    mes = total_meses % 12 + 1  # Ajustar mes a 1-12
+    return f"{calendar.month_abbr[mes]} {año}"
+
 
 if st.button("CONSULTAR"):
     datos_filtrados = data[data['regional_txt'] == region_seleccionada].copy()
